@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Jokemo Town | ระบบเช็กเวลาเข้าเวรหมอ</title>
+
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, Tahoma, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 15px;
+      min-height: 100vh;
+      color: white;
+      background: linear-gradient(135deg, #0f172a, #1e3a8a);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 850px;
+      margin: auto;
+    }
+
+    .header {
+      text-align: center;
+      margin: 15px 0 25px;
+    }
+
+    .header h1 {
+      margin: 0;
+      color: #4ade80;
+      font-size: 30px;
+    }
+
+    .header p {
+      color: #cbd5e1;
+      margin-top: 8px;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid #475569;
+      border-radius: 18px;
+      padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .card h2 {
+      color: #60a5fa;
+      font-size: 22px;
+      margin-top: 0;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #334155;
+    }
+
+    .form-group {
+      margin-bottom: 17px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #e2e8f0;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #64748b;
+      border-radius: 10px;
+      background: #1e293b;
+      color: white;
+      font-size: 16px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.2);
+    }
+
+    input[type="date"],
+    input[type="time"] {
+      color-scheme: dark;
+    }
+
+    .time-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      margin-top: 8px;
+      font-size: 15px;
+      font-weight: bold;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-start {
+      background: #16a34a;
+    }
+
+    .btn-end {
+      background: #dc2626;
+    }
+
+    .btn-calculate {
+      background: #2563eb;
+      margin-top: 5px;
+    }
+
+    .btn-email {
+      background: #9333ea;
+    }
+
+    .btn-clear {
+      background: #475569;
+    }
+
+    .btn-danger {
+      background: #b91c1c;
+    }
+
+    .notice {
+      padding: 13px;
+      margin: 12px 0;
+      border-radius: 10px;
+      background: #1e293b;
+      color: #cbd5e1;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .result {
+      display: none;
+      margin-top: 20px;
+      padding: 18px;
+      background: #020617;
+      border: 1px solid #475569;
+      border-radius: 14px;
+    }
+
+    .result.show {
+      display: block;
+    }
+
+    .result h3 {
+      margin-top: 0;
+      color: #facc15;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 10px 0;
+      border-bottom: 1px solid #334155;
+    }
+
+    .result-row:last-child {
+      border-bottom: none;
+    }
+
+    .pass {
+      color: #4ade80;
+      font-weight: bold;
+    }
+
+    .fail {
+      color: #f87171;
+      font-weight: bold;
+    }
+
+    .history-item {
+      padding: 15px;
+      margin-bottom: 12px;
+      border: 1px solid #475569;
+      border-radius: 12px;
+      background: #1e293b;
+    }
+
+    .history-item p {
+      margin: 7px 0;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    .history-item strong {
+      color: #93c5fd;
+    }
+
+    .empty {
+      text-align: center;
+      color: #94a3b8;
+      padding: 15px;
+    }
+
+    .footer {
+      text-align: center;
+      color: #94a3b8;
+      font-size: 13px;
+      margin: 20px 0;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+
+      .card {
+        padding: 16px;
+      }
+
+      .header h1 {
+        font-size: 25px;
+      }
+
+      .time-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .result-row {
+        flex-direction: column;
+        gap: 4px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="header">
+      <h1>🏥 Jokemo Town</h1>
+      <p>ระบบเช็กเวลาเข้าเวรแพทย์</p>
+    </div>
+
+    <!-- แบบฟอร์ม -->
+    <div class="card">
+      <h2>📋 แบบฟอร์มเข้าเวรหมอ</h2>
+
+      <div class="form-group">
+        <label for="doctorName">ชื่อหมอ</label>
+        <input
+          type="text"
+          id="doctorName"
+          placeholder="กรอกชื่อหมอ"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="workDate">วันที่เข้าเวร</label>
+        <input
+          type="date"
+          id="workDate"
+          required
+        >
+      </div>
+
+      <div class="time-grid">
+
+        <div class="form-group">
+          <label for="startTime">เวลาเข้าเวร</label>
+
+          <input
+            type="time"
+            id="startTime"
+            step="60"
+            required
+          >
+
+          <button
+            type="button"
+            class="btn-start"
+            onclick="setCurrentTime('startTime')"
+          >
+            🟢 กดเวลาเข้าเวรตอนนี้
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label for="endTime">เวลาออกเวร</label>
+
+          <input
+            type="time"
+            id="endTime"
+            step="60"
+            required
+          >
+
+          <button
+            type="button"
+            class="btn-end"
+            onclick="setCurrentTime('endTime')"
+          >
+            🔴 กดเวลาออกเวรตอนนี้
+          </button>
+        </div>
+
+      </div>
+
+      <div class="notice">
+        ⏱️ เวลาขั้นต่ำที่กำหนดคือ <strong>3 ชั่วโมง</strong>
+      </div>
+
+      <button
+        type="button"
+        class="btn-calculate"
+        onclick="calculateWorkTime()"
+      >
+        🧮 คำนวณเวลาเข้าเวร
+      </button>
+
+      <button
+        type="button"
+        class="btn-email"
+        onclick="sendEmailReport()"
+      >
+        📧 ส่งรายงานให้ผู้ดูแล
+      </button>
+
+      <button
+        type="button"
+        class="btn-clear"
+        onclick="clearForm()"
+      >
+        🔄 ล้างฟอร์ม
+      </button>
+
+      <!-- ผลการคำนวณ -->
+      <div id="resultBox" class="result">
+        <h3>📊 ผลการตรวจสอบ</h3>
+
+        <div class="result-row">
+          <span>ชื่อหมอ</span>
+          <strong id="resultDoctor">-</strong>
+        </div>
+
+        <div class="result-row">
+          <span>วันที่เข้าเวร</span>
+          <strong id="resultDate">-</strong>
+        </div>
+
+        <div class="result-row">
+          <span>เวลาเข้าเวร</span>
+          <strong id="resultStart">-</strong>
+        </div>
+
+        <div class="result-row">
+          <span>เวลาออกเวร</span>
+          <strong id="resultEnd">-</strong>
+        </div>
+
+        <div class="result-row">
+          <span>รวมเวลาเข้าเวร</span>
+          <strong id="resultTotal">-</strong>
+        </div>
+
+        <div class="result-row">
+          <span>เวลาขั้นต่ำ</span>
+          <strong>3 ชั่วโมง</strong>
+        </div>
+
+        <div class="result-row">
+          <span>สถานะ</span>
+          <strong id="resultStatus">-</strong>
+        </div>
+
+        <div class="notice" id="resultMessage"></div>
+      </div>
+    </div>
+
+    <!-- ประวัติ -->
+    <div class="card">
+      <h2>📚 ประวัติการเข้าเวร</h2>
+
+      <div id="historyList">
+        <div class="empty">
+          ยังไม่มีประวัติการเข้าเวร
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="btn-danger"
+        onclick="clearHistory()"
+      >
+        🗑️ ล้างประวัติทั้งหมด
+      </button>
+    </div>
+
+    <div class="footer">
+      Jokemo Town Medical Department © 2026
+    </div>
+
+  </div>
+
+  <script>
+    /*
+    ==========================================
+    ตั้งค่า EmailJS ตรงนี้
+    ==========================================
+    */
+
+    const PUBLIC_KEY = "ใส่_PUBLIC_KEY_ตรงนี้";
+    const SERVICE_ID = "ใส่_SERVICE_ID_ตรงนี้";
+    const TEMPLATE_ID = "ใส่_TEMPLATE_ID_ตรงนี้";
+
+    const REQUIRED_MINUTES = 180;
+
+    let latestReport = null;
+
+    /*
+    เริ่มต้น EmailJS
+    */
+    if (
+      typeof emailjs !== "undefined" &&
+      PUBLIC_KEY !== "ใส่_PUBLIC_KEY_ตรงนี้"
+    ) {
+      emailjs.init({
+        publicKey: PUBLIC_KEY
+      });
+    }
+
+    /*
+    ตั้งวันที่ปัจจุบัน
+    */
+    document.addEventListener("DOMContentLoaded", function () {
+      setTodayDate();
+      showHistory();
+    });
+
+    function setTodayDate() {
+      const today = new Date();
+
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, "0");
+      const day = String(today.getDate()).padStart(2, "0");
+
+      document.getElementById("workDate").value =
+        `${year}-${month}-${day}`;
+    }
+
+    /*
+    ตั้งเวลาปัจจุบัน
+    */
+    function setCurrentTime(inputId) {
+      const now = new Date();
+
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+
+      document.getElementById(inputId).value =
+        `${hours}:${minutes}`;
+    }
+
+    /*
+    แปลงเวลาเป็นนาที
+    */
+    function timeToMinutes(time) {
+      const parts = time.split(":");
+
+      const hours = Number(parts[0]);
+      const minutes = Number(parts[1]);
+
+      return hours * 60 + minutes;
+    }
+
+    /*
+    แปลงนาทีเป็นข้อความ
+    */
+    function formatDuration(totalMinutes) {
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+
+      return `${hours} ชั่วโมง ${minutes} นาที`;
+    }
+
+    /*
+    แปลงวันที่เป็นรูปแบบไทย
+    */
+    function formatDateThai(dateString) {
+      if (!dateString) {
+        return "-";
+      }
+
+      const parts = dateString.split("-");
+
+      if (parts.length !== 3) {
+        return dateString;
+      }
+
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+
+    /*
+    ป้องกัน HTML แปลกปลอม
+    */
+    function escapeHTML(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    /*
+    คำนวณเวลาเข้าเวร
+    */
+    function calculateWorkTime() {
+      const doctorName =
+        document.getElementById("doctorName").value.trim();
+
+      const workDate =
+        document.getElementById("workDate").value;
+
+      const startTime =
+        document.getElementById("startTime").value;
+
+      const endTime =
+        document.getElementById("endTime").value;
+
+      if (
+        !doctorName ||
+        !workDate ||
+        !startTime ||
+        !endTime
+      ) {
+        alert("กรุณากรอกข้อมูลให้ครบทุกช่อง");
+        return null;
+      }
+
+      let startMinutes = timeToMinutes(startTime);
+      let endMinutes = timeToMinutes(endTime);
+
+      /*
+      รองรับการเข้าเวรข้ามเที่ยงคืน
+      */
+      if (endMinutes < startMinutes) {
+        endMinutes += 1440;
+      }
+
+      const totalMinutes = endMinutes - startMinutes;
+      const passed = totalMinutes >= REQUIRED_MINUTES;
+
+      const status = passed
+        ? "ผ่านเกณฑ์"
+        : "ไม่ผ่านเกณฑ์";
+
+      const message = passed
+        ? "หมอเข้าเวรครบตามเวลาขั้นต่ำ 3 ชั่วโมงแล้ว"
+        : "หมอเข้าเวรไม่ครบ 3 ชั่วโมง กรุณาเข้าเวรให้ครบตามกำหนด";
+
+      latestReport = {
+        doctorName: doctorName,
+        workDate: workDate,
+        startTime: startTime,
+        endTime: endTime,
+        totalMinutes: totalMinutes,
+        totalText: formatDuration(totalMinutes),
+        requiredHours: "3 ชั่วโมง",
+        status: status,
+        message: message,
+        createdAt: new Date().toLocaleString("th-TH")
+      };
+
+      document.getElementById("resultDoctor").textContent =
+        doctorName;
+
+      document.getElementById("resultDate").textContent =
+        formatDateThai(workDate);
+
+      document.getElementById("resultStart").textContent =
+        startTime;
+
+      document.getElementById("resultEnd").textContent =
+        endTime;
+
+      document.getElementById("resultTotal").textContent =
+        formatDuration(totalMinutes);
+
+      const resultStatus =
+        document.getElementById("resultStatus");
+
+      resultStatus.textContent = status;
+      resultStatus.className = passed ? "pass" : "fail";
+
+      document.getElementById("resultMessage").textContent =
+        message;
+
+      document.getElementById("resultBox")
+        .classList.add("show");
+
+      saveHistory(latestReport);
+
+      return latestReport;
+    }
+
+    /*
+    ส่งอีเมลให้ผู้ดูแล
+    ไม่ต้องกรอกอีเมลในหน้าเว็บ
+    */
+    async function sendEmailReport() {
+      const report =
+        latestReport || calculateWorkTime();
+
+      if (!report) {
+        return;
+      }
+
+      if (
+        PUBLIC_KEY === "ใส่_PUBLIC_KEY_ตรงนี้" ||
+        SERVICE_ID === "ใส่_SERVICE_ID_ตรงนี้" ||
+        TEMPLATE_ID === "ใส่_TEMPLATE_ID_ตรงนี้"
+      ) {
+        alert(
+          "กรุณาตั้งค่า EmailJS ในโค้ดก่อนส่งอีเมล"
+        );
+        return;
+      }
+
+      if (typeof emailjs === "undefined") {
+        alert(
+          "ไม่สามารถโหลด EmailJS ได้ กรุณาตรวจสอบอินเทอร์เน็ต"
+        );
+        return;
+      }
+
+      const templateParams = {
+        doctor_name: report.doctorName,
+        work_date: formatDateThai(report.workDate),
+        start_time: report.startTime,
+        end_time: report.endTime,
+        total_hours: report.totalText,
+        required_hours: report.requiredHours,
+        status: report.status,
+        message: report.message,
+        created_at: report.createdAt
+      };
+
+      try {
+        await emailjs.send(
+          SERVICE_ID,
+          TEMPLATE_ID,
+          templateParams
+        );
+
+        alert("ส่งรายงานให้ผู้ดูแลเรียบร้อยแล้ว");
+
+      } catch (error) {
+        console.error("EmailJS Error:", error);
+
+        alert(
+          "ส่งอีเมลไม่สำเร็จ กรุณาตรวจสอบการตั้งค่า EmailJS"
+        );
+      }
+    }
+
+    /*
+    บันทึกประวัติ
+    */
+    function saveHistory(report) {
+      let history = [];
+
+      try {
+        history = JSON.parse(
+          localStorage.getItem("jokemo_work_history") || "[]"
+        );
+      } catch (error) {
+        history = [];
+      }
+
+      const lastItem = history[0];
+
+      /*
+      ป้องกันการบันทึกซ้ำ
+      */
+      if (
+        lastItem &&
+        lastItem.doctorName === report.doctorName &&
+        lastItem.workDate === report.workDate &&
+        lastItem.startTime === report.startTime &&
+        lastItem.endTime === report.endTime
+      ) {
+        showHistory();
+        return;
+      }
+
+      history.unshift(report);
+
+      /*
+      เก็บประวัติสูงสุด 100 รายการ
+      */
+      history = history.slice(0, 100);
+
+      localStorage.setItem(
+        "jokemo_work_history",
+        JSON.stringify(history)
+      );
+
+      showHistory();
+    }
+
+    /*
+    แสดงประวัติ
+    */
+    function showHistory() {
+      const historyList =
+        document.getElementById("historyList");
+
+      let history = [];
+
+      try {
+        history = JSON.parse(
+          localStorage.getItem("jokemo_work_history") || "[]"
+        );
+      } catch (error) {
+        history = [];
+      }
+
+      if (!history.length) {
+        historyList.innerHTML = `
+          <div class="empty">
+            ยังไม่มีประวัติการเข้าเวร
+          </div>
+        `;
+
+        return;
+      }
+
+      historyList.innerHTML = history.map(function (item) {
+        const isPassed =
+          item.status === "ผ่านเกณฑ์";
+
+        return `
+          <div class="history-item">
+
+            <p>
+              <strong>ชื่อหมอ:</strong>
+              ${escapeHTML(item.doctorName)}
+            </p>
+
+            <p>
+              <strong>วันที่:</strong>
+              ${escapeHTML(formatDateThai(item.workDate))}
+            </p>
+
+            <p>
+              <strong>เวลา:</strong>
+              ${escapeHTML(item.startTime)}
+              -
+              ${escapeHTML(item.endTime)}
+            </p>
+
+            <p>
+              <strong>รวมเวลา:</strong>
+              ${escapeHTML(item.totalText)}
+            </p>
+
+            <p>
+              <strong>สถานะ:</strong>
+              <span class="${isPassed ? "pass" : "fail"}">
+                ${escapeHTML(item.status)}
+              </span>
+            </p>
+
+            <p>
+              <strong>บันทึกเมื่อ:</strong>
+              ${escapeHTML(item.createdAt)}
+            </p>
+
+          </div>
+        `;
+      }).join("");
+    }
+
+    /*
+    ล้างฟอร์ม
+    */
+    function clearForm() {
+      document.getElementById("doctorName").value = "";
+      document.getElementById("startTime").value = "";
+      document.getElementById("endTime").value = "";
+
+      setTodayDate();
+
+      document.getElementById("resultBox")
+        .classList.remove("show");
+
+      latestReport = null;
+    }
+
+    /*
+    ล้างประวัติ
+    */
+    function clearHistory() {
+      const confirmDelete = confirm(
+        "ต้องการล้างประวัติทั้งหมดใช่หรือไม่?"
+      );
+
+      if (!confirmDelete) {
+        return;
+      }
+
+      localStorage.removeItem("jokemo_work_history");
+
+      showHistory();
+
+      alert("ล้างประวัติเรียบร้อยแล้ว");
+    }
+  </script>
+
+</body>
+</html>
